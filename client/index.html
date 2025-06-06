@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Science Facts Explorer</title>
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+  <header>
+    <h1>🔬 Science Facts Explorer</h1>
+    <button id="dark-mode-toggle">🌙 Dark Mode</button>
+  </header>
+
+  <div class="controls">
+    <input type="text" id="search" placeholder="Search facts...">
+    <select id="category">
+      <option value="all">All Categories</option>
+      <option value="space">Space</option>
+      <option value="biology">Biology</option>
+      <option value="physics">Physics</option>
+    </select>
+  </div>
+
+  <div id="facts-container" class="facts-grid"></div>
+
+  <script type="module" src="scripts/app.js"></script>
+</body>
+</html>
