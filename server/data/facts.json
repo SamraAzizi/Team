@@ -1,0 +1,29 @@
+[
+  {
+    "id": "fact1",
+    "title": "The Speed of Light",
+    "content": "Light travels at approximately 299,792 kilometers per second in a vacuum.",
+    "category": "Physics",
+    "source": "NASA",
+    "createdAt": "2023-01-01T00:00:00.000Z",
+    "updatedAt": "2023-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "fact2",
+    "title": "Human DNA",
+    "content": "If unwound and linked together, the DNA in all the cells in your body would stretch about 10 billion miles, which is from Earth to Pluto and back.",
+    "category": "Biology",
+    "source": "National Human Genome Research Institute",
+    "createdAt": "2023-01-02T00:00:00.000Z",
+    "updatedAt": "2023-01-02T00:00:00.000Z"
+  },
+  {
+    "id": "fact3",
+    "title": "Water on Earth",
+    "content": "About 71% of the Earth's surface is covered by water, but only about 3% of it is fresh water.",
+    "category": "Earth Science",
+    "source": "US Geological Survey",
+    "createdAt": "2023-01-03T00:00:00.000Z",
+    "updatedAt": "2023-01-03T00:00:00.000Z"
+  }
+]
