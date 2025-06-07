@@ -3,27 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Explore fascinating science facts about space, biology, physics and more">
   <title>Science Facts Explorer</title>
   <link rel="stylesheet" href="styles/main.css">
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon">
 </head>
 <body>
   <header>
-    <h1>🔬 Science Facts Explorer</h1>
-    <button id="dark-mode-toggle">🌙 Dark Mode</button>
+    <div class="header-content">
+      <h1>🔬 Science Facts Explorer</h1>
+      <div class="header-controls">
+        <button id="dark-mode-toggle" aria-label="Toggle dark mode">🌙 Dark Mode</button>
+        <button id="font-increase" aria-label="Increase font size">A+</button>
+        <button id="font-decrease" aria-label="Decrease font size">A-</button>
+      </div>
+    </div>
+    <p class="tagline">Discover amazing facts about our universe!</p>
   </header>
 
+  <nav class="breadcrumbs">
+    <ul>
+      <li><a href="#">Home</a></li>
+      <li>Science Facts</li>
+    </ul>
+  </nav>
+
   <div class="controls">
-    <input type="text" id="search" placeholder="Search facts...">
-    <select id="category">
-      <option value="all">All Categories</option>
-      <option value="space">Space</option>
-      <option value="biology">Biology</option>
-      <option value="physics">Physics</option>
-    </select>
+    <div class="search-container">
+      <input type="text" id="search" placeholder="Search facts..." aria-label="Search science facts">
+      <button id="search-btn" aria-label="Search">🔍</button>
+    </div>
+    <div class="filter-container">
+      <select id="category" aria-label="Filter by category">
+        <option value="all">All Categories</option>
+        <option value="space">Space</option>
+        <option value="biology">Biology</option>
+        <option value="physics">Physics</option>
+        <option value="chemistry">Chemistry</option>
+        <option value="technology">Technology</option>
+      </select>
+      <select id="difficulty" aria-label="Filter by difficulty">
+        <option value="all">All Levels</option>
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="advanced">Advanced</option>
+      </select>
+    </div>
   </div>
 
-  <div id="facts-container" class="facts-grid"></div>
+  <div class="stats-bar">
+    <span id="fact-count">0 facts loaded</span>
+    <span id="last-updated">Last updated: <time datetime="2023-11-01">November 2023</time></span>
+  </div>
+
+  <div id="facts-container" class="facts-grid">
+    <!-- Facts will be loaded here dynamically -->
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Loading fascinating facts...</p>
+    </div>
+  </div>
+
+  <aside class="featured-fact">
+    <h2>Fact of the Day</h2>
+    <div id="featured-fact-content">
+      <p>Did you know? A neutron star is so dense that one teaspoon of its material would weigh about 10 million tons!</p>
+    </div>
+  </aside>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>About</h3>
+        <p>Science Facts Explorer is a project dedicated to sharing interesting scientific knowledge with the world.</p>
+      </div>
+      <div class="footer-section">
+        <h3>Quick Links</h3>
+        <ul>
+          <li><a href="#">Home</a></li>
+          <li><a href="#">Categories</a></li>
+          <li><a href="#">Submit a Fact</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>Connect</h3>
+        <div class="social-links">
+          <a href="#" aria-label="Twitter"><span>🐦</span></a>
+          <a href="#" aria-label="Facebook"><span>📘</span></a>
+          <a href="#" aria-label="Instagram"><span>📷</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="copyright">
+      <p>&copy; 2023 Science Facts Explorer. All rights reserved.</p>
+    </div>
+  </footer>
 
   <script type="module" src="scripts/app.js"></script>
+  <!-- Load the polyfill for older browsers -->
+  <script nomodule src="scripts/polyfills.js"></script>
 </body>
 </html>
