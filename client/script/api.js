@@ -1,114 +1,163 @@
-
-const CACHE_EXPIRY_TIME = 1000 * 60 * 30; 
-let factsCache = null;
-let lastFetchTime = 0;
-
-/**
- * Fetches science facts either from cache or from the data source
- * @param {boolean} forceRefresh - Bypass cache and force a fresh fetch
- * @returns {Promise<Array>} Array of science facts
- */
-async function fetchScienceFacts(forceRefresh = false) {
-    // Return cached data if it's still valid and not forcing refresh
-    if (!forceRefresh && factsCache && Date.now() - lastFetchTime < CACHE_EXPIRY_TIME) {
-        console.log('Returning cached science facts');
-        return factsCache;
-    }
-
-    try {
-        console.log('Fetching science facts...');
+document.addEventListener('DOMContentLoaded', async () => {
+    const factsContainer = document.getElementById('facts-container');
+    const categoryFilter = document.getElementById('category-filter');
+    const searchInput = document.getElementById('search-input');
+    const searchBtn = document.getElementById('search-btn');
+    const refreshBtn = document.getElementById('refresh-btn');
+    const randomFactBtn = document.getElementById('random-fact-btn');
+    const factsCount = document.getElementById('facts-count');
+    const filterResetBtn = document.getElementById('filter-reset');
+    
+    let allFacts = [];
+    let categories = new Set();
+    let currentDisplayedFacts = [];
+    
+    // Load facts from API
+    async function loadFacts(forceRefresh = false) {
+        factsContainer.innerHTML = '<div class="loading"><div class="spinner"></div>Loading science facts...</div>';
         
-        
-        const response = await fetch('data/science-facts.json', {
-            cache: forceRefresh ? 'reload' : 'default'
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const facts = await response.json();
-        
-        // Validate the response structure
-        if (!Array.isArray(facts)) {
-            throw new Error('Invalid data format: expected an array of facts');
-        }
-
-        // Cache the results
-        factsCache = facts;
-        lastFetchTime = Date.now();
-        
-        // Optional: Store in localStorage for offline use
         try {
-            localStorage.setItem('scienceFacts', JSON.stringify({
-                data: facts,
-                timestamp: lastFetchTime
-            }));
-        } catch (e) {
-            console.warn('Could not cache facts in localStorage', e);
-        }
-
-        return facts;
-    } catch (error) {
-        console.error('Error fetching science facts:', error);
-        
-        // Try to return cached data from localStorage if available
-        try {
-            const cached = localStorage.getItem('scienceFacts');
-            if (cached) {
-                const parsed = JSON.parse(cached);
-                if (parsed.data && Array.isArray(parsed.data)) {
-                    console.warn('Using offline cached facts');
-                    return parsed.data;
-                }
+            allFacts = await fetchScienceFacts(forceRefresh);
+            currentDisplayedFacts = [...allFacts];
+            displayFacts(currentDisplayedFacts);
+            populateCategories();
+            updateFactsCount();
+            
+            // Store last update time
+            const lastUpdated = document.getElementById('last-updated');
+            if (lastUpdated) {
+                lastUpdated.textContent = new Date().toLocaleTimeString();
             }
-        } catch (e) {
-            console.warn('Could not read from localStorage', e);
+            
+        } catch (error) {
+            factsContainer.innerHTML = `
+                <div class="error">
+                    <p>Failed to load facts. ${error.message}</p>
+                    <button id="retry-load" class="retry-btn">Retry</button>
+                </div>
+            `;
+            document.getElementById('retry-load')?.addEventListener('click', () => loadFacts());
+            console.error('Error loading facts:', error);
         }
-
-        // If we have memory cache but failed to fetch new data
-        if (factsCache) {
-            console.warn('Returning stale cached facts');
-            return factsCache;
+    }
+    
+    // Display facts in the container
+    function displayFacts(facts) {
+        if (facts.length === 0) {
+            factsContainer.innerHTML = `
+                <div class="no-results">
+                    <p>No facts found matching your criteria.</p>
+                    <button id="reset-filters" class="reset-btn">Reset Filters</button>
+                </div>
+            `;
+            document.getElementById('reset-filters')?.addEventListener('click', resetFilters);
+            return;
         }
         
-        throw error;
+        factsContainer.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+        
+        facts.forEach(fact => {
+            const factElement = createFactCard(fact);
+            fragment.appendChild(factElement);
+        });
+        
+        factsContainer.appendChild(fragment);
+        currentDisplayedFacts = [...facts];
+        updateFactsCount();
     }
-}
-
-/**
- * Gets a random science fact from the fetched data
- * @returns {Promise<Object>} A random science fact
- */
-async function getRandomScienceFact() {
-    const facts = await fetchScienceFacts();
-    if (!facts.length) {
-        throw new Error('No facts available');
+    
+    // Create a fact card element
+    function createFactCard(fact) {
+        const card = document.createElement('div');
+        card.className = 'fact-card';
+        
+        // Add data attributes for filtering
+        card.dataset.category = fact.category;
+        card.dataset.title = fact.title.toLowerCase();
+        card.dataset.content = fact.content.toLowerCase();
+        card.dataset.source = fact.source ? fact.source.toLowerCase() : '';
+        
+        card.innerHTML = `
+            <span class="fact-category">${fact.category}</span>
+            <h3 class="fact-title">${fact.title}</h3>
+            <p class="fact-content">${fact.content}</p>
+            ${fact.source ? `<p class="fact-source">Source: <a href="${fact.source}" target="_blank" rel="noopener">${fact.source}</a></p>` : ''}
+            <div class="fact-actions">
+                <button class="copy-btn" title="Copy to clipboard">📋</button>
+                <button class="share-btn" title="Share this fact">↗️</button>
+            </div>
+        `;
+        
+        // Add event listeners for action buttons
+        card.querySelector('.copy-btn').addEventListener('click', () => copyToClipboard(fact));
+        card.querySelector('.share-btn').addEventListener('click', () => shareFact(fact));
+        
+        return card;
     }
-    return facts[Math.floor(Math.random() * facts.length)];
-}
-
-/**
- * Gets facts filtered by category
- * @param {string} category - The category to filter by
- * @returns {Promise<Array>} Filtered array of facts
- */
-async function getFactsByCategory(category) {
-    const facts = await fetchScienceFacts();
-    return facts.filter(fact => 
-        fact.category && fact.category.toLowerCase() === category.toLowerCase()
-    );
-}
-
-/**
- * Prefetches facts for better performance
- */
-function prefetchScienceFacts() {
-    // Start fetching but don't wait for it
-    fetchScienceFacts().catch(e => 
-        console.debug('Prefetch failed (this is normal for offline)', e)
-    );
-}
-
-// Export the functions if using modules
-// export { fetchScienceFacts, getRandomScienceFact, getFactsByCategory, prefetchScienceFacts };
+    
+    // Extract and populate categories
+    function populateCategories() {
+        categories = new Set(allFacts.map(fact => fact.category));
+        categoryFilter.innerHTML = '<option value="all">All Categories</option>';
+        
+        const sortedCategories = Array.from(categories).sort();
+        
+        sortedCategories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categoryFilter.appendChild(option);
+        });
+    }
+    
+    // Filter facts based on selected category and search term
+    function filterFacts() {
+        const selectedCategory = categoryFilter.value;
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        
+        let filteredFacts = allFacts;
+        
+        // Filter by category
+        if (selectedCategory !== 'all') {
+            filteredFacts = filteredFacts.filter(fact => fact.category === selectedCategory);
+        }
+        
+        // Filter by search term
+        if (searchTerm) {
+            filteredFacts = filteredFacts.filter(fact => 
+                fact.title.toLowerCase().includes(searchTerm) || 
+                fact.content.toLowerCase().includes(searchTerm) ||
+                (fact.source && fact.source.toLowerCase().includes(searchTerm))
+            );
+        }
+        
+        displayFacts(filteredFacts);
+    }
+    
+    // Reset all filters
+    function resetFilters() {
+        categoryFilter.value = 'all';
+        searchInput.value = '';
+        displayFacts(allFacts);
+    }
+    
+    // Update the facts counter
+    function updateFactsCount() {
+        if (factsCount) {
+            factsCount.textContent = `${currentDisplayedFacts.length} of ${allFacts.length} facts`;
+        }
+    }
+    
+    // Copy fact to clipboard
+    function copyToClipboard(fact) {
+        const text = `${fact.title}\n\n${fact.content}\n\n${fact.source ? `Source: ${fact.source}` : ''}`;
+        navigator.clipboard.writeText(text)
+            .then(() => {
+                showToast('Fact copied to clipboard!');
+            })
+            .catch(err => {
+                console.error('Failed to copy:', err);
+                showToast('Failed to copy fact', 'error');
+            });
+    }
