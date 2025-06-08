@@ -65,3 +65,50 @@ async function fetchScienceFacts(forceRefresh = false) {
         } catch (e) {
             console.warn('Could not read from localStorage', e);
         }
+
+        // If we have memory cache but failed to fetch new data
+        if (factsCache) {
+            console.warn('Returning stale cached facts');
+            return factsCache;
+        }
+        
+        throw error;
+    }
+}
+
+/**
+ * Gets a random science fact from the fetched data
+ * @returns {Promise<Object>} A random science fact
+ */
+async function getRandomScienceFact() {
+    const facts = await fetchScienceFacts();
+    if (!facts.length) {
+        throw new Error('No facts available');
+    }
+    return facts[Math.floor(Math.random() * facts.length)];
+}
+
+/**
+ * Gets facts filtered by category
+ * @param {string} category - The category to filter by
+ * @returns {Promise<Array>} Filtered array of facts
+ */
+async function getFactsByCategory(category) {
+    const facts = await fetchScienceFacts();
+    return facts.filter(fact => 
+        fact.category && fact.category.toLowerCase() === category.toLowerCase()
+    );
+}
+
+/**
+ * Prefetches facts for better performance
+ */
+function prefetchScienceFacts() {
+    // Start fetching but don't wait for it
+    fetchScienceFacts().catch(e => 
+        console.debug('Prefetch failed (this is normal for offline)', e)
+    );
+}
+
+// Export the functions if using modules
+// export { fetchScienceFacts, getRandomScienceFact, getFactsByCategory, prefetchScienceFacts };
