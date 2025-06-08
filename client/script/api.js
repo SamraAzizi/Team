@@ -161,3 +161,80 @@ document.addEventListener('DOMContentLoaded', async () => {
                 showToast('Failed to copy fact', 'error');
             });
     }
+
+    // Share fact
+    function shareFact(fact) {
+        if (navigator.share) {
+            navigator.share({
+                title: fact.title,
+                text: fact.content,
+                url: fact.source || window.location.href
+            }).catch(err => {
+                console.error('Error sharing:', err);
+                showToast('Share cancelled', 'warning');
+            });
+        } else {
+            // Fallback for browsers that don't support Web Share API
+            copyToClipboard(fact);
+        }
+    }
+    
+    // Show toast notification
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('fade-out');
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    }
+    
+    // Event listeners
+    categoryFilter.addEventListener('change', filterFacts);
+    searchBtn.addEventListener('click', filterFacts);
+    searchInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') filterFacts();
+    });
+    
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => loadFacts(true));
+    }
+    
+    if (randomFactBtn) {
+        randomFactBtn.addEventListener('click', async () => {
+            try {
+                const randomFact = await getRandomScienceFact();
+                displayFacts([randomFact]);
+            } catch (error) {
+                showToast('Failed to get random fact', 'error');
+                console.error('Error getting random fact:', error);
+            }
+        });
+    }
+    
+    if (filterResetBtn) {
+        filterResetBtn.addEventListener('click', resetFilters);
+    }
+    
+    // Initial load
+    await loadFacts();
+    
+    // Add intersection observer for lazy loading if needed
+    if ('IntersectionObserver' in window && factsContainer.children.length > 10) {
+        const lazyLoadObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    lazyLoadObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        Array.from(factsContainer.children).forEach(child => {
+            lazyLoadObserver.observe(child);
+        });
+    }
+});
