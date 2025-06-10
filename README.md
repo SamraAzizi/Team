@@ -1,9 +1,3 @@
-# 🔬 Science Facts Explorer
-
-**Science Facts Explorer** is a simple, interactive web application that allows users to explore fascinating science facts through a visually appealing interface. The project combines a clean frontend with a modular backend API that serves data dynamically.
-
----
-
 ## 🌟 Features
 
 - 📚 Get interesting, educational science facts
@@ -15,5 +9,28 @@
 
 ---
 
-## 🗂️ Project Structure
+## 🛠️ Tech Stack
 
+**Frontend:**
+- HTML5, CSS3
+- JavaScript (ES6)
+- Modular components (e.g., `FactCard.js`)
+
+**Backend (choose one):**
+- Node.js + Express  
+  or  
+- Python + Flask
+
+**Other Tools:**
+- JSON (local data: `facts.json`)
+- Testing frameworks (Jest, Mocha, or PyTest)
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/science-facts-explorer.git
+cd science-facts-explorer
